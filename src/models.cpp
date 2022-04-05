@@ -21,8 +21,13 @@ namespace simulation {
 	void ParticleModel::reset() {
 		particles.clear();
 		// setup
-		for (int i = -5; i <= 5; ++i) {
-			particles.push_back(Particle({i, i, 0.f}, {-i, 3.f * i, 0.f}));
+		for (size_t i = 0; i < boidsNumber; ++i) {
+			auto random = [](float low, float high) {
+				return low + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(high - low)));
+			};
+			particles.push_back(Particle(
+					{random(-bounds, bounds), random(-bounds, bounds), random(-bounds, bounds)},
+					{random(-3.f, 3.f), random(-3.f, 3.f), random(-3.f, 3.f)}));
 		}
 	}
 
@@ -42,17 +47,18 @@ namespace simulation {
 		bgi::rtree<IndexedPoint , bgi::quadratic<16> > tree(indexedPoints);
 
 		for (size_t i = 0; i < particles.size(); i++) {
-			auto p = particles[i];
+			auto &p = particles[i];
 			float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
 			float x = p.position.x, y = p.position.y, z = p.position.z;
 			Box queryBox(
 		Point(x - maxRadius, y - maxRadius, z - maxRadius),
-		Point(x + maxRadius, y - maxRadius, z - maxRadius)
+		Point(x + maxRadius, y + maxRadius, z + maxRadius)
 			);
 
 			std::vector<IndexedPoint> neighbors;
 			tree.query(bgi::covered_by(queryBox), std::back_inserter(neighbors));
 
+//			std::cout<<neighbors.size()<<std::endl;
 			for (auto &[position, j]: neighbors) {
 				if (i == j) {
 					continue;
@@ -63,21 +69,21 @@ namespace simulation {
 				auto alpha = glm::dot(deltaPos, p.velocity);
 
 				if (distance < separationRadius && alpha > cos(separationRadius)) {
+//					std::cout<<i<<" "<<j<<":separation\n";
 					p.applyForce(calculateSeparationForce(p, neighbor), dt);
 				} else if (distance < alignmentRadius && alpha > cos(alignmentAngle)) {
+//					std::cout<<i<<" "<<j<<":alignment\n";
 					p.applyForce(calculateAlignmentForce(p, neighbor), dt);
 				} else if (distance < cohesionRadius && alpha > cos(cohesionAngle)) {
+//					std::cout<<i<<" "<<j<<":cohesion\n";
 					p.applyForce(calculateCohesionForce(p, neighbor), dt);
 				}
 			}
 
 			auto nextPos = p.position + p.velocity * dt;
 			if (glm::length(nextPos) > bounds) {
-				std::printf("\nvel: %f,%f,%f\n", p.velocity.x, p.velocity.y, p.velocity.z);
-				std::printf("pos: %f,%f,%f\n", p.position.x, p.position.y, p.position.z);
 				auto n = glm::normalize(p.position);
 				p.velocity = glm::reflect(p.velocity, n);
-				std::printf("newVel: %f,%f,%f\n", p.velocity.x, p.velocity.y, p.velocity.z);
 			}
 		}
 

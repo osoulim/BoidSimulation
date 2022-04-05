@@ -82,8 +82,12 @@ int main(void) {
 		//
 		// simulation
 		//
-		if (panel::playModel || panel::stepModel)
+		if (panel::playModel || panel::stepModel) {
+			model->separationConstant = panel::separationConstant;
+			model->alignmentConstant = panel::alignmentConstant;
+			model->cohesionConstant = panel::cohesionConstant;
 			model->step(panel::dt);
+		}
 
 		//
 		// render

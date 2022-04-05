@@ -49,16 +49,17 @@ namespace simulation {
 
 	public:
 		std::vector<Particle> particles;
-		float bounds = 10.f,
-			separationRadius = 5.f,
-			separationAngle = M_PI * 0.75,
+		size_t boidsNumber = 100;
+		float bounds = 20.f,
+			separationRadius = 3.f,
+			separationAngle = M_PI * 0.45,
 			separationConstant = 1.f,
 
 			alignmentRadius = 5.f,
-			alignmentAngle = M_PI * 0.3,
+			alignmentAngle = M_PI * 0.2,
 			alignmentConstant = 1.f,
 
-			cohesionRadius = 5.f,
+			cohesionRadius = 3.f,
 			cohesionAngle = M_PI * 0.5,
 			cohesionConstant = 1.0f;
 	};

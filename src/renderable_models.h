@@ -40,8 +40,33 @@ namespace simulation {
 			addInstance(point_renders, M);
 		}
 
+		static Cylinder c1(Point1(0.f, 0.f, 0.f), Point2(0.05f, 0.f, 0.f), Radius(model.bounds), AzimuthPoints(50));
+		static Cylinder c2(Point1(0.f, 0.f, 0.f), Point2(0.f, 0.05f, 0.f), Radius(model.bounds), AzimuthPoints(50));
+		static Cylinder c3(Point1(0.f, 0.f, 0.f), Point2(0.f, 0.f, 0.05f), Radius(model.bounds), AzimuthPoints(50));
+
+		static auto circle_renderable1 = createRenderable(
+				c1,
+				Phong(Colour(0.1f, 0.1f, 0.1f),
+					  LightPosition(100.f, 100.f, 100.f)) // style
+		);
+		static auto circle_renderable2 = createRenderable(
+				c2,
+				Phong(Colour(0.1f, 0.1f, 0.1f),
+					  LightPosition(100.f, 100.f, 100.f)) // style
+		);
+		static auto circle_renderable3 = createRenderable(
+				c3,
+				Phong(Colour(0.1f, 0.1f, 0.1f),
+					  LightPosition(100.f, 100.f, 100.f)) // style
+		);
+
+
+
 		// draw the renderable
 		draw(point_renders, view);
+		draw(circle_renderable1, view);
+		draw(circle_renderable2, view);
+		draw(circle_renderable3, view);
 	}
 
 //

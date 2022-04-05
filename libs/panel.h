@@ -9,18 +9,22 @@
 
 namespace panel {
 
-extern bool showPanel;
-extern ImVec4 clear_color;
+	extern bool showPanel;
+	extern ImVec4 clear_color;
 
 // animation
-extern bool playModel;
-extern bool resetModel;
-extern bool stepModel;
-extern float dt;
+	extern bool playModel;
+	extern bool resetModel;
+	extern bool stepModel;
+	extern float dt;
+
+	extern float separationConstant;
+	extern float alignmentConstant;
+	extern float cohesionConstant;
 
 // reset
-extern bool resetView;
+	extern bool resetView;
 
-void updateMenu();
+	void updateMenu();
 
 } // namespace panel
