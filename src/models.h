@@ -14,7 +14,7 @@ namespace simulation {
 
 	struct Model {
 		virtual ~Model() = default;
-		virtual void reset() = 0;
+		virtual void reset(int) = 0;
 		virtual void step(float dt) = 0;
 	};
 
@@ -30,6 +30,13 @@ namespace simulation {
 			position += velocity * dt;
 		}
 
+		void applyVelocityLimit(float limit) {
+			auto velocityAmount = glm::length(velocity);
+			if (velocityAmount > limit) {
+				velocity = velocity / velocityAmount * limit;
+			}
+		}
+
 		vec3f position;
 		vec3f velocity = vec3f{0.f};
 	};
@@ -40,7 +47,7 @@ namespace simulation {
 	class ParticleModel : public Model {
 	public:
 		ParticleModel();
-		void reset() override;
+		void reset(int = 100);
 		void step(float dt) override;
 
 		vec3f calculateSeparationForce(Particle& a, Particle& b) const;
@@ -49,18 +56,18 @@ namespace simulation {
 
 	public:
 		std::vector<Particle> particles;
-		size_t boidsNumber = 100;
-		float bounds = 20.f,
-			separationRadius = 3.f,
-			separationAngle = M_PI * 0.45,
+		float bounds = 30.f,
+			velocityLimit = 5,
+			separationRadius = 2.f,
+			separationAngle = M_PI * (3.f/4.f),
 			separationConstant = 1.f,
 
-			alignmentRadius = 5.f,
-			alignmentAngle = M_PI * 0.2,
+			alignmentRadius = 4.f,
+			alignmentAngle = M_PI,
 			alignmentConstant = 1.f,
 
 			cohesionRadius = 3.f,
-			cohesionAngle = M_PI * 0.5,
+			cohesionAngle = M_PI,
 			cohesionConstant = 1.0f;
 	};
 

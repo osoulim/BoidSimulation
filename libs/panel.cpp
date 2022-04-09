@@ -12,11 +12,13 @@ namespace panel {
 	bool playModel = false;
 	bool resetModel = false;
 	bool stepModel = false;
-	float dt = 0.1f;
+	float dt = 0.3f;
 
 	float separationConstant = 0.05f;
 	float alignmentConstant = 0.05f;
 	float cohesionConstant = 0.005f;
+
+	int boidsNumber = 100;
 
 
 	// reset
@@ -49,8 +51,10 @@ namespace panel {
 			if (Button("Play/Pause")) {
 				playModel = !playModel;
 			}
-			resetModel = Button("Reset Model");
 			stepModel = Button("Step");
+
+			SliderInt("Number of boids", &boidsNumber, 10, 1000);
+			resetModel = Button("Reset Model");
 			InputFloat("dt", &dt, 0.00001f, 0.1f, "%.5f");
 
 			SliderFloat("Separation factor", &separationConstant, 0.f, 0.1f, "%.2f");

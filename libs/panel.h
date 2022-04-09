@@ -22,6 +22,8 @@ namespace panel {
 	extern float alignmentConstant;
 	extern float cohesionConstant;
 
+	extern int boidsNumber;
+
 // reset
 	extern bool resetView;
 

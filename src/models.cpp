@@ -18,15 +18,15 @@ namespace simulation {
 //
 	ParticleModel::ParticleModel() { reset(); }
 
-	void ParticleModel::reset() {
+	void ParticleModel::reset(int inputBoidsNumber) {
 		particles.clear();
 		// setup
-		for (size_t i = 0; i < boidsNumber; ++i) {
+		for (size_t i = 0; i < inputBoidsNumber; ++i) {
 			auto random = [](float low, float high) {
 				return low + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(high - low)));
 			};
 			particles.push_back(Particle(
-					{random(-bounds, bounds), random(-bounds, bounds), random(-bounds, bounds)},
+					{random(-bounds/2, bounds/2), random(-bounds/2, bounds/2), random(-bounds/2, bounds/2)},
 					{random(-3.f, 3.f), random(-3.f, 3.f), random(-3.f, 3.f)}));
 		}
 	}
@@ -71,20 +71,23 @@ namespace simulation {
 				if (distance < separationRadius && alpha > cos(separationRadius)) {
 //					std::cout<<i<<" "<<j<<":separation\n";
 					p.applyForce(calculateSeparationForce(p, neighbor), dt);
-				} else if (distance < alignmentRadius && alpha > cos(alignmentAngle)) {
+				}
+				if (distance < alignmentRadius && alpha > cos(alignmentAngle)) {
 //					std::cout<<i<<" "<<j<<":alignment\n";
 					p.applyForce(calculateAlignmentForce(p, neighbor), dt);
-				} else if (distance < cohesionRadius && alpha > cos(cohesionAngle)) {
+				}
+				if (distance < cohesionRadius && alpha > cos(cohesionAngle)) {
 //					std::cout<<i<<" "<<j<<":cohesion\n";
 					p.applyForce(calculateCohesionForce(p, neighbor), dt);
 				}
 			}
 
-			auto nextPos = p.position + p.velocity * dt;
-			if (glm::length(nextPos) > bounds) {
+//			auto nextPos = p.position + p.velocity * dt;
+			if (glm::length(p.position) > bounds) {
 				auto n = glm::normalize(p.position);
 				p.velocity = glm::reflect(p.velocity, n);
 			}
+			p.applyVelocityLimit(velocityLimit);
 		}
 
 		// move particles
@@ -95,8 +98,8 @@ namespace simulation {
 	}
 
 	vec3f ParticleModel::calculateSeparationForce(Particle& a, Particle& b) const {
-		auto dist = glm::length(b.position - a.position);
-		return -separationConstant * (b.position - a.position) / (dist * dist);
+		auto dist = glm::length(a.position - b.position);
+		return separationConstant * (a.position - b.position) / (dist * dist);
 	}
 
 	vec3f ParticleModel::calculateAlignmentForce(Particle &a, Particle &b) const {

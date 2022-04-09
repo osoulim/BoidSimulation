@@ -77,7 +77,7 @@ int main(void) {
 		if (panel::resetView)
 			view.camera.reset();
 		if (panel::resetModel)
-			model->reset();
+			model->reset(panel::boidsNumber);
 
 		//
 		// simulation
