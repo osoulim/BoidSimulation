@@ -4,19 +4,10 @@
 
 namespace simulation {
 
-
-	namespace bg = boost::geometry;
-	namespace bgi = boost::geometry::index;
-
-	using Point = bg::model::point<float, 3, bg::cs::cartesian>;
-	using Box = bg::model::box<Point>;
-	using IndexedPoint = std::pair<Point, std::size_t>;
-
-
 //
 // Particle Model
 //
-	ParticleModel::ParticleModel() { reset(); }
+	ParticleModel::ParticleModel() { reset(100); }
 
 	void ParticleModel::reset(int inputBoidsNumber) {
 		particles.clear();
@@ -32,34 +23,16 @@ namespace simulation {
 	}
 
 	void ParticleModel::step(float dt) {
-		std::vector<IndexedPoint> indexedPoints;
-
-		size_t idGen = 0;
-		std::transform(
-				particles.begin(), particles.end(),
-				back_inserter(indexedPoints),
-				[&idGen](Particle const& particle) {
-					Point point(particle.position.x, particle.position.y, particle.position.z);
-					return std::make_pair(point, idGen++);
-				}
-		);
-
-		bgi::rtree<IndexedPoint , bgi::quadratic<16> > tree(indexedPoints);
+		auto spatialStructure = BoostRTree(particles);
 
 		for (size_t i = 0; i < particles.size(); i++) {
 			auto &p = particles[i];
 			float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
-			float x = p.position.x, y = p.position.y, z = p.position.z;
-			Box queryBox(
-		Point(x - maxRadius, y - maxRadius, z - maxRadius),
-		Point(x + maxRadius, y + maxRadius, z + maxRadius)
-			);
 
-			std::vector<IndexedPoint> neighbors;
-			tree.query(bgi::covered_by(queryBox), std::back_inserter(neighbors));
+			std::vector<int> neighbors = spatialStructure.getNeighbours(p.position, maxRadius);
 
 //			std::cout<<neighbors.size()<<std::endl;
-			for (auto &[position, j]: neighbors) {
+			for (auto &j: neighbors) {
 				if (i == j) {
 					continue;
 				}
@@ -107,7 +80,7 @@ namespace simulation {
 		}
 		auto position = particles[0].position;
 		auto speed = particles[0].velocity;
-		printf("particle0 loc and speed %f,%f,%f - %f,%f,%f \n", position.x, position.y, position.z, speed.x, speed.y, speed.z);
+//		printf("particle0 loc and speed %f,%f,%f - %f,%f,%f \n", position.x, position.y, position.z, speed.x, speed.y, speed.z);
 	}
 
 	vec3f ParticleModel::calculateSeparationForce(Particle& a, Particle& b) const {
@@ -121,5 +94,42 @@ namespace simulation {
 
 	vec3f ParticleModel::calculateCohesionForce(Particle &a, Particle &b) const {
 		return cohesionConstant * (b.position - a.position);
+	}
+
+	BoostRTree::BoostRTree(std::vector<Particle> const &particles) {
+		std::vector<IndexedPoint> indexedPoints;
+		size_t idGen = 0;
+		std::transform(
+				particles.begin(), particles.end(),
+				back_inserter(indexedPoints),
+				[&idGen](Particle const& particle) {
+					Point point(particle.position.x, particle.position.y, particle.position.z);
+					return std::make_pair(point, idGen++);
+				}
+		);
+		tree = std::make_unique<bgi::rtree<IndexedPoint , bgi::quadratic<16>>>(indexedPoints);
+	}
+
+	std::vector<int> BoostRTree::getNeighbours(vec3f position, float maxRadius) {
+
+		float x = position.x, y = position.y, z = position.z;
+		Box queryBox(
+				Point(x - maxRadius, y - maxRadius, z - maxRadius),
+				Point(x + maxRadius, y + maxRadius, z + maxRadius)
+		);
+
+		std::vector<IndexedPoint> neighbors;
+		tree->query(bgi::covered_by(queryBox), std::back_inserter(neighbors));
+
+		std::vector<int> result;
+		std::transform(
+				neighbors.begin(), neighbors.end(),
+				back_inserter(result),
+				[](IndexedPoint indexedPoint) {
+					return indexedPoint.second;
+				}
+		);
+
+		return result;
 	}
 } // namespace simulation

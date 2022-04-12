@@ -9,6 +9,13 @@
 
 namespace simulation {
 
+	namespace bg = boost::geometry;
+	namespace bgi = boost::geometry::index;
+
+	using Point = bg::model::point<float, 3, bg::cs::cartesian>;
+	using Box = bg::model::box<Point>;
+	using IndexedPoint = std::pair<Point, std::size_t>;
+
 	using vec2f = glm::vec2;
 	using vec3f = glm::vec3;
 
@@ -47,7 +54,7 @@ namespace simulation {
 	class ParticleModel : public Model {
 	public:
 		ParticleModel();
-		void reset(int = 100);
+		void reset(int) override;
 		void step(float dt) override;
 
 		vec3f calculateSeparationForce(Particle& a, Particle& b) const;
@@ -70,6 +77,20 @@ namespace simulation {
 			cohesionRadius = 3.f,
 			cohesionAngle = M_PI,
 			cohesionConstant = 1.0f;
+	};
+
+	struct SpatialStructure {
+		virtual ~SpatialStructure() = default;
+		virtual std::vector<int> getNeighbours(vec3f, float) = 0;
+	};
+
+	class BoostRTree: SpatialStructure {
+	public:
+		std::vector<int> getNeighbours(vec3f, float) override;
+		explicit BoostRTree(std::vector<Particle> const &);
+
+	private:
+		std::unique_ptr<bgi::rtree<IndexedPoint , bgi::quadratic<16>>> tree;
 	};
 
 } // namespace simulation
