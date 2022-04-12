@@ -47,7 +47,7 @@ int main(void) {
 											  .title("Attack of the bird ... oh my!")
 											  .glslVersionString("#version 330 core"));
 
-	auto view = View(TurnTable(), Perspective());
+	auto view = View(TurnTable(Latitude(M_PI / 2.5f), Longitude(M_PI / 4.f), Zoom(150)), Perspective());
 	// Preset Bindings
 	TurnTableControls controls(window, view.camera);
 
@@ -99,7 +99,6 @@ int main(void) {
 		view.projection.updateAspectRatio(window.width(), window.height());
 
 		render(modelRenderable, view);
-
 	});
 
 	return EXIT_SUCCESS;

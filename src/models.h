@@ -56,8 +56,8 @@ namespace simulation {
 
 	public:
 		std::vector<Particle> particles;
-		float bounds = 30.f,
-			velocityLimit = 5,
+		float bounds = 50.f,
+			velocityLimit = 5.f,
 			separationRadius = 2.f,
 			separationAngle = M_PI * (3.f/4.f),
 			separationConstant = 1.f,

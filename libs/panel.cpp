@@ -12,7 +12,7 @@ namespace panel {
 	bool playModel = false;
 	bool resetModel = false;
 	bool stepModel = false;
-	float dt = 0.3f;
+	float dt = 0.5f;
 
 	float separationConstant = 0.05f;
 	float alignmentConstant = 0.05f;

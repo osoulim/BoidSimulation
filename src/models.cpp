@@ -27,7 +27,7 @@ namespace simulation {
 			};
 			particles.push_back(Particle(
 					{random(-bounds/2, bounds/2), random(-bounds/2, bounds/2), random(-bounds/2, bounds/2)},
-					{random(-3.f, 3.f), random(-3.f, 3.f), random(-3.f, 3.f)}));
+					{random(-1.f, 1.f), random(-1.f, 1.f), random(-1.f, 1.f)}));
 		}
 	}
 
@@ -95,6 +95,9 @@ namespace simulation {
 			// forward Euler
 			p.applyVelocity(dt);
 		}
+		auto position = particles[0].position;
+		auto speed = particles[0].velocity;
+		printf("particle0 loc and speed %f,%f,%f - %f,%f,%f \n", position.x, position.y, position.z, speed.x, speed.y, speed.z);
 	}
 
 	vec3f ParticleModel::calculateSeparationForce(Particle& a, Particle& b) const {

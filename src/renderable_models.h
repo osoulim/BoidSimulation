@@ -26,17 +26,25 @@ namespace simulation {
 		// This isn't the most elegant method to do this but it works. Just put your
 		// draw calls in here.
 
+		auto boidGeometry = TriangleSoup();
+		boidGeometry.push_back(Triangle(Point1(0.f, 1.f, 0.15f), Point2(-0.25, 0.f, 0.f), Point3(0.25, 0.f, 0.f)));
+		boidGeometry.push_back(Triangle(Point1(0.f, 1.f, 0.15f), Point2(0.25, 0.f, 0.f), Point3(0.0, 0.f, 0.45f)));
+		boidGeometry.push_back(Triangle(Point1(0.f, 1.f, 0.15f), Point2(0.0, 0.f, 0.45f), Point3(-0.25, 0.f, 0.f)));
+
 		static auto point_renders = createInstancedRenderable(
-				Sphere(Radius(0.25f)), // geometry
-				Phong(Colour(1.f, 0.4f, 0.2f),
-					  LightPosition(100.f, 100.f, 100.f)) // style
+				boidGeometry,
+				NoShading(Colour(1.f, 0.4f, 0.2f)) // style
 		);
 
 		// load up renderable
 		auto const &particles = model.particles;
 
 		for (auto const &particle : particles) {
-			auto M = translate(mat4f{1.f}, particle.position);
+			auto newY = normalize(particle.velocity);
+			auto newZ = cross(newY, givr::vec3f{0.f, 0.f, 1.f});
+			auto newX = cross(newY, newZ);
+			auto M = translate(mat4f{1.f}, particle.position)
+					* mat4(vec4{newX, 0.f}, vec4{newY, 0.f}, vec4{newZ, 0.f}, vec4{vec3{0.f}, 1.f});
 			addInstance(point_renders, M);
 		}
 
