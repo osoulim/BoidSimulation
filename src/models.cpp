@@ -82,11 +82,21 @@ namespace simulation {
 				}
 			}
 
-//			auto nextPos = p.position + p.velocity * dt;
-			if (glm::length(p.position) > bounds) {
-				auto n = glm::normalize(p.position);
-				p.velocity = glm::reflect(p.velocity, n);
+//			if (glm::length(p.position) > bounds) {
+//				auto n = glm::normalize(p.position);
+//				p.velocity = glm::reflect(p.velocity, n);
+//			}
+
+			// cube collision
+			for (int axis = 0; axis < 3; axis++) {
+				if (p.position[axis] < -bounds) {
+					p.velocity[axis] += turnFactor;
+				} else if (p.position[axis] > bounds) {
+					p.velocity[axis] -= turnFactor;
+				}
 			}
+
+
 			p.applyVelocityLimit(velocityLimit);
 		}
 

@@ -48,33 +48,34 @@ namespace simulation {
 			addInstance(point_renders, M);
 		}
 
-		static Cylinder c1(Point1(0.f, 0.f, 0.f), Point2(0.05f, 0.f, 0.f), Radius(model.bounds), AzimuthPoints(50));
-		static Cylinder c2(Point1(0.f, 0.f, 0.f), Point2(0.f, 0.05f, 0.f), Radius(model.bounds), AzimuthPoints(50));
-		static Cylinder c3(Point1(0.f, 0.f, 0.f), Point2(0.f, 0.f, 0.05f), Radius(model.bounds), AzimuthPoints(50));
+		static auto grid = MultiLine();
+		static int numberOfCells = 4;
+		float cellSize = 2 * model.bounds / (numberOfCells-1);
 
-		static auto circle_renderable1 = createRenderable(
-				c1,
-				Phong(Colour(0.1f, 0.1f, 0.1f),
-					  LightPosition(100.f, 100.f, 100.f)) // style
-		);
-		static auto circle_renderable2 = createRenderable(
-				c2,
-				Phong(Colour(0.1f, 0.1f, 0.1f),
-					  LightPosition(100.f, 100.f, 100.f)) // style
-		);
-		static auto circle_renderable3 = createRenderable(
-				c3,
-				Phong(Colour(0.1f, 0.1f, 0.1f),
-					  LightPosition(100.f, 100.f, 100.f)) // style
-		);
+		static std::vector<std::vector<int>> neighbors {
+				std::vector<int> {-1, 0, 0},
+				std::vector<int> {0, -1, 0},
+				std::vector<int> {0, 0, -1},
+		};
 
+		for (int x = 0; x < numberOfCells; x++)
+			for (int y = 0; y < numberOfCells; y++)
+				for (int z = 0; z < numberOfCells; z++)
+					for (auto &neighbor: neighbors) {
+						auto newX = x + neighbor[0];
+						auto newY = y + neighbor[1];
+						auto newZ = z + neighbor[2];
+						if (newX >= 0 && newX < numberOfCells && newY >= 0 && newY < numberOfCells && newZ >= 0 && newZ < numberOfCells) {
+							grid.push_back(Line(Point1(x * cellSize - model.bounds, y * cellSize - model.bounds, z * cellSize - model.bounds),
+												Point2(newX * cellSize - model.bounds, newY * cellSize - model.bounds, newZ * cellSize - model.bounds)));
+						}
+					}
 
+		static auto grid_renderable = createRenderable(grid, NoShading(Colour(0.f, 0.f, 0.f)));
 
 		// draw the renderable
 		draw(point_renders, view);
-		draw(circle_renderable1, view);
-		draw(circle_renderable2, view);
-		draw(circle_renderable3, view);
+		draw(grid_renderable, view);
 	}
 
 //
