@@ -19,6 +19,8 @@ namespace simulation {
 	using vec2f = glm::vec2;
 	using vec3f = glm::vec3;
 
+	using vec3i = glm::ivec3;
+
 	struct Model {
 		virtual ~Model() = default;
 		virtual void reset(int) = 0;
@@ -92,5 +94,17 @@ namespace simulation {
 	private:
 		std::unique_ptr<bgi::rtree<IndexedPoint , bgi::quadratic<16>>> tree;
 	};
+
+	class MamziIndex: SpatialStructure {
+	public:
+		std::vector<int> getNeighbours(vec3f, float) override;
+		explicit MamziIndex(std::vector<Particle> const &, float);
+
+	private:
+		std::map<std::vector<int>, std::vector<int>> spatialMap;
+		static std::vector<int> getIndex(vec3f, float);
+	};
+
+
 
 } // namespace simulation

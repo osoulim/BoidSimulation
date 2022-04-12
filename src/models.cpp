@@ -23,11 +23,13 @@ namespace simulation {
 	}
 
 	void ParticleModel::step(float dt) {
+		float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
+
 		auto spatialStructure = BoostRTree(particles);
+//		auto spatialStructure = MamziIndex(particles, maxRadius);
 
 		for (size_t i = 0; i < particles.size(); i++) {
 			auto &p = particles[i];
-			float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
 
 			std::vector<int> neighbors = spatialStructure.getNeighbours(p.position, maxRadius);
 
@@ -129,6 +131,45 @@ namespace simulation {
 					return indexedPoint.second;
 				}
 		);
+
+		return result;
+	}
+
+	MamziIndex::MamziIndex(const std::vector<Particle> & particles, float radius) {
+		spatialMap.clear();
+
+		int particleId = 0;
+		for (auto &p: particles) {
+			auto integerIndex = getIndex(p.position, radius);
+			if (spatialMap.find(integerIndex) == spatialMap.end()) {
+				spatialMap.insert(std::make_pair(integerIndex, std::vector<int>{}));
+			}
+			spatialMap[integerIndex].push_back(particleId);
+			particleId++;
+		}
+	}
+
+	std::vector<int> MamziIndex::getIndex(vec3f position, float radius) {
+		return std::vector<int> {
+			static_cast<int>(position.x / radius),
+			static_cast<int>(position.y / radius),
+			static_cast<int>(position.z / radius),
+		};
+	}
+
+	std::vector<int> MamziIndex::getNeighbours(vec3f position, float radius) {
+		auto result = std::vector<int>();
+		auto integerIndex = getIndex(position, radius);
+
+		for (int dx = -1; dx <= 1; dx++)
+			for (int dy = -1; dy <= 1; dy++)
+				for (int dz = -1; dz <= 1; dz++) {
+					auto index = std::vector<int>{integerIndex[0] + dx, integerIndex[1] + dy, integerIndex[2] + dz};
+					if (spatialMap.find(index) != spatialMap.end()) {
+						auto tempVec = spatialMap[index];
+						result.insert(result.end(), tempVec.begin(), tempVec.end());
+					}
+				}
 
 		return result;
 	}

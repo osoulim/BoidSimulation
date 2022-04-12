@@ -53,7 +53,7 @@ namespace panel {
 			}
 			stepModel = Button("Step");
 
-			SliderInt("Number of boids", &boidsNumber, 10, 1000);
+			SliderInt("Number of boids", &boidsNumber, 10, 2000);
 			resetModel = Button("Reset Model");
 			InputFloat("dt", &dt, 0.00001f, 0.1f, "%.5f");
 
