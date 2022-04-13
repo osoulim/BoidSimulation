@@ -25,6 +25,9 @@ namespace panel {
 	extern int boidsNumber;
 	extern int indexingMethod;
 
+	extern bool showParticleModel;
+	extern bool showCollisionModel;
+
 // reset
 	extern bool resetView;
 

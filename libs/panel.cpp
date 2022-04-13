@@ -14,6 +14,9 @@ namespace panel {
 	bool stepModel = false;
 	float dt = 0.5f;
 
+	bool showParticleModel;
+	bool showCollisionModel;
+
 	float separationConstant = 0.05f;
 	float alignmentConstant = 0.05f;
 	float cohesionConstant = 0.005f;
@@ -46,6 +49,11 @@ namespace panel {
 			if (CollapsingHeader("Background Color")) { // Clear
 				ColorEdit3("Clear color", (float *)&clear_color);
 			}
+
+
+			showParticleModel = Button("Particle Model");
+			showCollisionModel = Button("Collision Model");
+
 
 			Spacing();
 			Separator();

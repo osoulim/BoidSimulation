@@ -64,8 +64,9 @@ int main(void) {
 		}
 	});
 
-	auto model = std::make_unique<ParticleModel>();
-	auto modelRenderable = makeModelRenderable(*model, view);
+	auto defaultModel = std::make_unique<ParticleModel>(100);
+	auto modelRenderable = makeModelRenderable(*defaultModel, view);
+	std::unique_ptr<Model> model = std::move(defaultModel);
 
 	//
 	// main loop
@@ -78,6 +79,20 @@ int main(void) {
 			view.camera.reset();
 		if (panel::resetModel)
 			model->reset(panel::boidsNumber);
+
+		if (panel::showParticleModel) {
+			auto newModel = std::make_unique<ParticleModel>(panel::boidsNumber);
+			modelRenderable = makeModelRenderable(*newModel, view);
+			model = std::move(newModel);
+			panel::playModel = false;
+		}
+
+		if (panel::showCollisionModel) {
+			auto newModel = std::make_unique<ParticleBarrierModel>();
+			modelRenderable = makeModelRenderable(*newModel, view);
+			model = std::move(newModel);
+			panel::playModel = false;
+		}
 
 		//
 		// simulation

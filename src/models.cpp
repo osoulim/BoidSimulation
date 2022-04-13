@@ -7,7 +7,9 @@ namespace simulation {
 //
 // Particle Model
 //
-	ParticleModel::ParticleModel() { reset(100); }
+	ParticleModel::ParticleModel(int inputBoidsNumber) {
+		reset(inputBoidsNumber);
+	}
 
 	void ParticleModel::reset(int inputBoidsNumber) {
 		particles.clear();
@@ -20,93 +22,6 @@ namespace simulation {
 					{random(-bounds/2, bounds/2), random(-bounds/2, bounds/2), random(-bounds/2, bounds/2)},
 					{random(-1.f, 1.f), random(-1.f, 1.f), random(-1.f, 1.f)}));
 		}
-	}
-
-	void ParticleModel::step(float dt, int indexingMethod) {
-		float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
-
-		BoostRTree rTree; MamziIndex mamziIndex;
-
-		if (indexingMethod == 0) {
-			mamziIndex = MamziIndex(particles, maxRadius);
-		} else {
-			rTree = BoostRTree(particles);
-		}
-
-
-		for (size_t i = 0; i < particles.size(); i++) {
-			auto &p = particles[i];
-
-			std::vector<int> neighbors;
-			if (indexingMethod == 0) {
-				neighbors = mamziIndex.getNeighbours(p.position, maxRadius);
-			} else {
-				neighbors = rTree.getNeighbours(p.position, maxRadius);
-			}
-
-//			std::cout<<neighbors.size()<<std::endl;
-			for (auto &j: neighbors) {
-				if (i == j) {
-					continue;
-				}
-				Particle neighbor = particles[j];
-				auto deltaPos = p.position - neighbor.position;
-				auto distance = glm::length(deltaPos);
-				auto alpha = glm::dot(deltaPos, p.velocity);
-
-				if (distance < separationRadius && alpha > cos(separationRadius)) {
-//					std::cout<<i<<" "<<j<<":separation\n";
-					p.applyForce(calculateSeparationForce(p, neighbor), dt);
-				}
-				if (distance < alignmentRadius && alpha > cos(alignmentAngle)) {
-//					std::cout<<i<<" "<<j<<":alignment\n";
-					p.applyForce(calculateAlignmentForce(p, neighbor), dt);
-				}
-				if (distance < cohesionRadius && alpha > cos(cohesionAngle)) {
-//					std::cout<<i<<" "<<j<<":cohesion\n";
-					p.applyForce(calculateCohesionForce(p, neighbor), dt);
-				}
-			}
-
-//			if (glm::length(p.position) > bounds) {
-//				auto n = glm::normalize(p.position);
-//				p.velocity = glm::reflect(p.velocity, n);
-//			}
-
-			// cube collision
-			for (int axis = 0; axis < 3; axis++) {
-				if (p.position[axis] < -bounds) {
-					p.velocity[axis] += turnFactor;
-				} else if (p.position[axis] > bounds) {
-					p.velocity[axis] -= turnFactor;
-				}
-			}
-
-
-			p.applyVelocityLimit(velocityLimit);
-		}
-
-		// move particles
-		for (auto &p : particles) {
-			// forward Euler
-			p.applyVelocity(dt);
-		}
-		auto position = particles[0].position;
-		auto speed = particles[0].velocity;
-//		printf("particle0 loc and speed %f,%f,%f - %f,%f,%f \n", position.x, position.y, position.z, speed.x, speed.y, speed.z);
-	}
-
-	vec3f ParticleModel::calculateSeparationForce(Particle& a, Particle& b) const {
-		auto dist = glm::length(a.position - b.position);
-		return separationConstant * (a.position - b.position) / (dist * dist);
-	}
-
-	vec3f ParticleModel::calculateAlignmentForce(Particle &a, Particle &b) const {
-		return alignmentConstant * (b.velocity - a.velocity);
-	}
-
-	vec3f ParticleModel::calculateCohesionForce(Particle &a, Particle &b) const {
-		return cohesionConstant * (b.position - a.position);
 	}
 
 	BoostRTree::BoostRTree(std::vector<Particle> const &particles) {
@@ -183,5 +98,21 @@ namespace simulation {
 				}
 
 		return result;
+	}
+
+	void ParticleBarrierModel::reset(int number) {
+		particles.clear();
+		for(int x = 0; x < 20; x++) {
+			for (int y = -2; y <= 2; y++) {
+				for (int z = -2; z <= 2; z++) {
+					particles.push_back(Particle(vec3f{10.f + x * 1.f, y * 2.f, z * 2.f}, vec3f{-.2f, 0.f, 0.f}));
+				}
+			}
+		}
+		particles.push_back(Particle(vec3f{0.f}, vec3f{0.f}, true));
+	}
+
+	ParticleBarrierModel::ParticleBarrierModel() {
+		reset(0);
 	}
 } // namespace simulation
