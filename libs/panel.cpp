@@ -19,6 +19,7 @@ namespace panel {
 	float cohesionConstant = 0.005f;
 
 	int boidsNumber = 100;
+	int indexingMethod = 0;
 
 
 	// reset
@@ -52,6 +53,10 @@ namespace panel {
 				playModel = !playModel;
 			}
 			stepModel = Button("Step");
+
+			RadioButton("Grid Index", &indexingMethod, 0); SameLine();
+			RadioButton("R-tree", &indexingMethod, 1);
+
 
 			SliderInt("Number of boids", &boidsNumber, 10, 2000);
 			resetModel = Button("Reset Model");

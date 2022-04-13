@@ -86,7 +86,7 @@ int main(void) {
 			model->separationConstant = panel::separationConstant;
 			model->alignmentConstant = panel::alignmentConstant;
 			model->cohesionConstant = panel::cohesionConstant;
-			model->step(panel::dt);
+			model->step(panel::dt, panel::indexingMethod);
 		}
 
 		//

@@ -24,7 +24,7 @@ namespace simulation {
 	struct Model {
 		virtual ~Model() = default;
 		virtual void reset(int) = 0;
-		virtual void step(float dt) = 0;
+		virtual void step(float dt, int indexingMethod) = 0;
 	};
 
 	struct Particle {
@@ -57,7 +57,7 @@ namespace simulation {
 	public:
 		ParticleModel();
 		void reset(int) override;
-		void step(float dt) override;
+		void step(float dt, int indexingMethod) override;
 
 		vec3f calculateSeparationForce(Particle& a, Particle& b) const;
 		vec3f calculateAlignmentForce(Particle& a, Particle& b) const;
@@ -82,12 +82,15 @@ namespace simulation {
 	};
 
 	struct SpatialStructure {
+		SpatialStructure() = default;
 		virtual ~SpatialStructure() = default;
-		virtual std::vector<int> getNeighbours(vec3f, float) = 0;
+		virtual std::vector<int> getNeighbours(vec3f, float) {return {};};
 	};
 
-	class BoostRTree: SpatialStructure {
+	class BoostRTree: public SpatialStructure {
 	public:
+		BoostRTree() = default;
+
 		std::vector<int> getNeighbours(vec3f, float) override;
 		explicit BoostRTree(std::vector<Particle> const &);
 
@@ -95,8 +98,9 @@ namespace simulation {
 		std::unique_ptr<bgi::rtree<IndexedPoint , bgi::quadratic<16>>> tree;
 	};
 
-	class MamziIndex: SpatialStructure {
+	class MamziIndex: public SpatialStructure {
 	public:
+		MamziIndex() = default;
 		std::vector<int> getNeighbours(vec3f, float) override;
 		explicit MamziIndex(std::vector<Particle> const &, float);
 

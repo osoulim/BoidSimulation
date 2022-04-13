@@ -23,6 +23,7 @@ namespace panel {
 	extern float cohesionConstant;
 
 	extern int boidsNumber;
+	extern int indexingMethod;
 
 // reset
 	extern bool resetView;

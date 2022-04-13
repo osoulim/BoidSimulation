@@ -22,16 +22,27 @@ namespace simulation {
 		}
 	}
 
-	void ParticleModel::step(float dt) {
+	void ParticleModel::step(float dt, int indexingMethod) {
 		float maxRadius = std::max(separationRadius, std::max(alignmentRadius, cohesionRadius));
 
-		auto spatialStructure = BoostRTree(particles);
-//		auto spatialStructure = MamziIndex(particles, maxRadius);
+		BoostRTree rTree; MamziIndex mamziIndex;
+
+		if (indexingMethod == 0) {
+			mamziIndex = MamziIndex(particles, maxRadius);
+		} else {
+			rTree = BoostRTree(particles);
+		}
+
 
 		for (size_t i = 0; i < particles.size(); i++) {
 			auto &p = particles[i];
 
-			std::vector<int> neighbors = spatialStructure.getNeighbours(p.position, maxRadius);
+			std::vector<int> neighbors;
+			if (indexingMethod == 0) {
+				neighbors = mamziIndex.getNeighbours(p.position, maxRadius);
+			} else {
+				neighbors = rTree.getNeighbours(p.position, maxRadius);
+			}
 
 //			std::cout<<neighbors.size()<<std::endl;
 			for (auto &j: neighbors) {
